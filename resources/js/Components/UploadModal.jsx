@@ -39,7 +39,7 @@ export default function UploadModal({ isOpen, onClose, folders = [] }) {
     const handleSubmit = (e) => {
         e.preventDefault();
         
-        post(route('documents.store'), {
+        post('/documents', {
             forceFormData: true,
             onSuccess: () => {
                 reset();

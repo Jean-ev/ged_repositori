@@ -2,6 +2,7 @@ import { Head } from '@inertiajs/react';
 import AppLayout from '@/Layouts/AppLayout';
 import DocumentMenu from '@/Components/DocumentMenu';
 import { FileText, CheckCircle, Clock, Users, Folder, MoreVertical } from 'lucide-react';
+import SearchBar from '@/Components/SearchBar';
 
 export default function GEDDashboard({ auth, stats, recentFolders, recentDocuments }) {
     // Icônes pour les KPIs
@@ -30,11 +31,14 @@ export default function GEDDashboard({ auth, stats, recentFolders, recentDocumen
         <AppLayout>
             <Head title="Dashboard GED" />
 
-            <div className="space-y-8">
-                {/* En-tête */}
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Vue d'ensemble</h1>
+                    <div className="space-y-8">
+            {/* En-tête avec recherche */}
+            <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-gray-900">Vue d'ensemble</h1>
+                <div className="flex-1 max-w-md ml-8">
+                    <SearchBar />
                 </div>
+            </div>
 
                 {/* KPIs - 4 cartes de statistiques */}
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">

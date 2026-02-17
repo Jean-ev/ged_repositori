@@ -4,11 +4,27 @@ import DocumentMenu from '@/Components/DocumentMenu';
 import { Upload, Folder, FileText, MoreVertical, Info } from 'lucide-react';
 import { useState } from 'react';
 import UploadModal from '@/Components/UploadModal';
-
+import FileTypeFilter from '@/Components/FileTypeFilter';
+import CreateFolderModal from '@/Components/CreateFolderModal';
+import { FolderPlus } from 'lucide-react';
+import FolderMenu from '@/Components/FolderMenu';
+import EditFolderModal from '@/Components/EditFolderModal';
 
 export default function MyDocuments({ auth, myFolders, myDocuments, storageStats }) {
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+    const [isFolderModalOpen, setIsFolderModalOpen] = useState(false); 
+    const [isEditFolderModalOpen, setIsEditFolderModalOpen] = useState(false);  // ← AJOUTER
+    const [selectedFolder, setSelectedFolder] = useState(null);  // ← AJOUTER
+    const [activeFilter, setActiveFilter] = useState('all');
+    // Filtrer les documents selon le type
+    const filteredDocuments = activeFilter === 'all' 
+    ? myDocuments.data 
+    : myDocuments.data.filter(doc => doc.type === activeFilter);
     const filterTabs = ['Tous', 'PDF', 'Images', 'Tableurs'];
+    const handleEditFolder = (folder) => {
+    setSelectedFolder(folder);
+    setIsEditFolderModalOpen(true);
+    };
 
     return (
         <AppLayout>
@@ -23,11 +39,22 @@ export default function MyDocuments({ auth, myFolders, myDocuments, storageStats
                             Consultez vos propres fichiers, ceux autorisés par l'administrateur et vos espaces d'équipe selon votre profil.
                         </p>
                     </div>
-                    <button className="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
-                        onClick={() => setIsUploadModalOpen(true)}
-                        <Upload className="h-5 w-5 mr-2" />
-                        Importer un fichier
-                    </button>
+                    <div className="flex gap-3">
+                        <button 
+                            onClick={() => setIsFolderModalOpen(true)}
+                            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                        >
+                            <FolderPlus className="h-5 w-5 mr-2" />
+                            Nouveau dossier
+                        </button>
+                        <button 
+                            onClick={() => setIsUploadModalOpen(true)}
+                            className="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+                        >
+                            <Upload className="h-5 w-5 mr-2" />
+                            Importer un fichier
+                        </button>
+                    </div>
                 </div>
 
                 {/* Profil utilisateur et infos */}
@@ -111,9 +138,8 @@ export default function MyDocuments({ auth, myFolders, myDocuments, storageStats
                                     >
                                         <Folder className="h-6 w-6" />
                                     </div>
-                                    <button className="text-gray-400 hover:text-gray-600">
-                                        <MoreVertical className="h-5 w-5" />
-                                    </button>
+                                        <FolderMenu folder={folder} onEdit={handleEditFolder} />
+
                                 </div>
                                 <h3 className="font-semibold text-gray-900 mb-2">{folder.name}</h3>
                                 <p className="text-sm text-gray-600">
@@ -129,21 +155,10 @@ export default function MyDocuments({ auth, myFolders, myDocuments, storageStats
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-xl font-semibold text-gray-900">Liste des documents</h2>
                         
-                        {/* Onglets de filtrage */}
-                        <div className="flex space-x-2">
-                            {filterTabs.map((tab) => (
-                                <button
-                                    key={tab}
-                                    className={`px-4 py-2 text-sm font-medium rounded-lg ${
-                                        tab === 'Tous'
-                                            ? 'bg-blue-100 text-blue-700'
-                                            : 'text-gray-600 hover:bg-gray-100'
-                                    }`}
-                                >
-                                    {tab}
-                                </button>
-                            ))}
-                        </div>
+                        <FileTypeFilter 
+                            activeFilter={activeFilter}
+                            onFilterChange={setActiveFilter}
+                        />
                     </div>
 
                     <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -168,7 +183,7 @@ export default function MyDocuments({ auth, myFolders, myDocuments, storageStats
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                                {myDocuments.data.map((document) => (
+                                {filteredDocuments.map((document) => (
                                     <tr key={document.id} className="hover:bg-gray-50">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
@@ -216,13 +231,21 @@ export default function MyDocuments({ auth, myFolders, myDocuments, storageStats
                     </p>
                 </div>
             </div>
-            {/* Modal d'upload */}
-            <UploadModal
-                isOpen={isUploadModalOpen}
-                onClose={() => setIsUploadModalOpen(false)}
-                folders={myFolders}
+            {/* Modal de création de dossier */}
+            <CreateFolderModal
+                isOpen={isFolderModalOpen}
+                onClose={() => setIsFolderModalOpen(false)}
             />
 
+            {/* Modal d'édition de dossier */}
+            <EditFolderModal
+                isOpen={isEditFolderModalOpen}
+                onClose={() => {
+                    setIsEditFolderModalOpen(false);
+                    setSelectedFolder(null);
+                }}
+                folder={selectedFolder}
+            />
         </AppLayout>
     );
 }
